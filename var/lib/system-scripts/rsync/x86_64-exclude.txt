@@ -1,0 +1,5 @@
+*.i*86.rpm
+*-debuginfo-*.rpm
+debug/
+repoview/
+drpms/

@@ -1,0 +1,11 @@
+etc/casjaysdev/system-scripts/include/rsync/atrpms.sh
+etc/casjaysdev/updates/version.txt
+etc/messages/000.issues.txt
+etc/messages/000.motd.txt
+etc/tmpfiles.d/system-scripts.conf
+root/bin/lico-update.sh
+root/bin/services.sh
+root/bin/system-update.sh
+root/bin/update.sh
+usr/share/system-scripts/otheroses.sh
+usr/share/system-scripts/turnkeylinux.sh

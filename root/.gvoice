@@ -1,0 +1,7 @@
+[auth]
+email=username@gmail.com
+password=yourpassword
+
+[gvoice]
+forwardingNumber=
+phoneType=1

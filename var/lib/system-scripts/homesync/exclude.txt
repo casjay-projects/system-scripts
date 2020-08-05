@@ -1,0 +1,5 @@
+./aquota.usr
+./aquota.grp
+.spam*
+.usermin
+Maildir*

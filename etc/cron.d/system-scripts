@@ -1,0 +1,15 @@
+#Casjays System-Scripts cron jobs
+
+*/5 * * * * root sh -c "/usr/share/system-scripts/cron.sh > /dev/null 2>&1"
+5 * * * * root fortune > /etc/casjaysdev/system-scripts/messages/000.motd.txt 2>&1
+8 */3 * * * root sh -c "/root/bin/update-system.sh > /dev/null 2>&1"
+10 1 * * * root sh -c "/usr/share/system-scripts/rpmpkgs.sh > /dev/null 2>&1"
+15 1 * * * root sh -c "/usr/share/system-scripts/clean.sh > /dev/null 2>&1"
+30 2 * * * root sh -c "/usr/share/system-scripts/backupsystem.sh > /dev/null 2>&1"
+30 3 * * * root sh -c "/usr/share/system-scripts/backuphome.sh > /dev/null 2>&1"
+30 4 1 * * root sh -c "/usr/share/system-scripts/installedrpms.sh > /dev/null 2>&1"
+
+#0 1 * * * root sh -c "/usr/share/system-scripts/rsync.sh > /dev/null 2>&1"
+#0 2 * * * root sh -c "/usr/share/system-scripts/migrate.sh > /dev/null 2>&1"
+#05 1 * * * root sh -c "/usr/share/system-scripts/homesync.sh > /dev/null 2>&1"
+#0 6 * * 7 root sh -c /usr/share/system-scripts/remote-backup.sh > /dev/null 2>&1"

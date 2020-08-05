@@ -1,0 +1,30 @@
+#Backup remote servers
+#-----------------------------------------------------------------------------------------------------------------------
+REMOTEHOST=""
+REMOTEHOSTSHORT=""
+BACKUPMODULE="backup-"
+REMOTEBACKUPDIR="REMOTEHOSTSHORT"
+LOCALBACKUPDIR="$BACKUPDIR/$REMOTEHOSTSHORT"
+RSYNCLOCKFILE="$RSYNCLOCKDIR/$REMOTEHOSTSHORT.lock"
+RSYNCCMD="rsync -avhP"
+#-----------------------------------------------------------------------------------------------------------------------
+
+if [ -f $RSYNCLOCKFILE ] ; then
+cat $RSYNCLOCKFILE | mail -r $MAILRECIP -s "$MAILSUB" $MAILFROM
+echo -e "$PROG is currently Runnning on $HOSTNAME with $PROGPID" > $RSYNCLOCKFILE
+echo "exit 10 $RSYNCLOCKFILE exists" >>$LOGFILE 2>>$ERRORLOG
+exit 10
+fi
+
+echo -e "$PROG is currently Runnning on $HOSTNAME with $PROGPID" > $RSYNCLOCKFILE
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+if [ ! -d $LOCALBACKUPDIR ]; then mkdir -p $LOCALBACKUPDIR ; fi
+echo "Starting rsync for $REMOTEHOST"  >>$LOGFILE 2>>$ERRORLOG
+$RSYNCCMD $REMOTEHOST/$BACKUPMODULE/$REMOTEBACKUPDIR/ $LOCALBACKUPDIR/ >>$LOGFILE 2>>$ERRORLOG
+echo "rsync for $REMOTEHOST complete" >>$LOGFILE 2>>$ERRORLOG
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+rm -Rf $RSYNCLOCKFILE

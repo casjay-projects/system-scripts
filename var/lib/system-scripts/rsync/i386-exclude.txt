@@ -1,0 +1,4 @@
+*-debuginfo-*.rpm
+debug/
+repoview/
+drpms/

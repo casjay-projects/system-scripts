@@ -1,0 +1,112 @@
+#!/bin/sh
+#############################################
+#                                           #
+# Send an email on system start/stop to     #
+# start/stop to a user.                     #
+#                                           #
+#############################################
+
+# chkconfig: 2345 98 05
+# Description: Sends an alert at system start and shutdown
+
+### BEGIN INIT INFO
+# Provides: systemmail
+# Required-Start: network postfix
+# Required-Stop:
+# Should-Start: network postfix
+# Should-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop: 1 6
+# Short-Description: Send Notifications
+# Description: Send notification on server start and shutdown
+### END INIT INFO
+
+prog=systemmail
+LOCKFILE=/var/lock/subsys/systemmail
+
+# Source function library.
+. /etc/init.d/functions
+source /etc/sysconfig/system-scripts.sh
+ 
+stop()
+{
+echo -n $"Stopping systemmail: "
+if [ "$SENDMAIL" = "yes" ] ; then
+echo "${STOPBODY}" | mail -s "${STOPSUBJECT}" ${EMAIL} > /dev/null
+fi
+if [ "$SENDTWIT" = "yes" ] ; then
+echo "${STOPBODY}" | mail -r $TWEETYSENDER ${TWITTER} > /dev/null
+fi
+if [ "$SENDXMPP" = "yes" ] ; then
+echo "${STOPBODY}" | $XMPP > /dev/null
+fi
+if [ "$SENDSMS" = "yes" ] ; then
+$GVOICE "${STOPBODY}" > /dev/null
+fi
+sleep 10
+RETVAL=$?
+ 
+if [ ${RETVAL} -eq 0 ]; then
+rm -f ${LOCKFILE}
+success
+else
+failure
+fi
+echo
+return ${RETVAL}
+}
+ 
+start()
+{
+echo -n $"Starting systemmail: "
+if [ "$SENDMAIL" = "yes" ] ; then
+echo "${STARTBODY}" | mail -s "${STARTSUBJECT}" ${EMAIL} > /dev/null
+fi
+if [ "$SENDTWIT" = "yes" ] ; then
+echo "${STARTBODY}" | mail -r $TWEETYSENDER ${TWITTER} > /dev/null
+fi
+if [ "$SENDXMPP" = "yes" ]; then
+echo "${STARTBODY}" | $XMPP > /dev/null
+fi
+if [ "$SENDSMS" = "yes" ] ; then
+$GVOICE "${STARTBODY}" > /dev/null
+fi
+RETVAL=$?
+ 
+if [ ${RETVAL} -eq 0 ]; then
+touch ${LOCKFILE}
+success
+else
+failure
+fi
+echo
+return ${RETVAL}
+}
+ 
+restart() {
+	stop
+	sleep 10
+	start
+}	
+
+reload() {
+	restart
+}	
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+reload|restart)
+	restart
+	;;
+*)
+	echo $"Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+

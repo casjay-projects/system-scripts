@@ -1,0 +1,32 @@
+#Download the MYAPP packages
+#site is http://MYAPP.com
+#-----------------------------------------------------------------------------------------------------------------------
+RSYNCLOCKFILE="$RSYNCLOCKDIR/MYAPP.lock"
+MIRRORMYAPP="rsync://mirrors.liquidweb.com/MYAPP"
+RSYNCMYAPP="yes"
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+if [ -f $RSYNCLOCKFILE ] ; then
+cat $RSYNCLOCKFILE | mail -r $MAILRECIP -s "$MAILSUB" $MAILFROM
+echo -e "$PROG is currently Runnning on $HOSTNAME with $PROGPID" > $RSYNCLOCKFILE
+echo "exit 10 $RSYNCLOCKFILE exists" >>$LOGFILE 2>>$ERRORLOG
+exit 10
+fi
+
+echo -e "$PROG is currently Runnning on $HOSTNAME with $PROGPID" > $RSYNCLOCKFILE
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+if [ $RSYNCMYAPP == "yes" ]; then
+if [ ! -d $FTPDIR/$FTPSUB/MYAPP ]; then mkdir -p $FTPDIR/$FTPSUB/MYAPP ; fi
+echo "Starting rsync for MYAPP"  >>$LOGFILE 2>>$ERRORLOG
+$RSYNCCMD $MIRRORMYAPP $FTPDIR/$FTPSUB/MYAPP/ >>$LOGFILE 2>>$ERRORLOG
+echo "rsync for MYAPP complete" >>$LOGFILE 2>>$ERRORLOG
+else
+echo "RSYNC Not enabled for MYAPP" >>$LOGFILE 2>>$ERRORLOG
+fi
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+rm -Rf $RSYNCLOCKFILE

@@ -1,0 +1,211 @@
+#!/usr/bin/perl -w
+
+#	Parts Copyright 2010 Chris Ditri <grooveman@brokensolstice.com>
+#	Copyright (C) 2009-2010 Nathan Gibbs nathan@cmpublishers.com
+#
+#	This program is free software; you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License version 1
+#	as published by the Free Software Foundation.
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}' if 0;
+
+use strict;
+use Getopt::Long;
+my %opt;
+my $ME;
+($ME = $0) =~ s-.*/--;
+my $usage = "$ME [-d] [-e Event] [-m msg] host [host...]\n";
+my $CLAM_ENGINE = `/usr/bin/clamav-config --version`;
+
+# parse the commandline if any
+GetOptions (\%opt, "debug", "event=s", "m=s") || die $usage;
+my $DEBUG	= $opt{"debug"} || 0;
+my $EVENT	= $opt{"event"} || "";
+my $msg = $opt{"m"} || "Found VIRUS";
+# Vars
+my ( $tmp, $mail, $VF, $VR, $VAmsg, $RCPT, $subject, $To, $ENGINE, $Host );
+
+# Set these to suit your environment.
+$mail = "/usr/bin/mail";
+$To = "virusadmin\@myserverdomainname";
+
+# Start
+if ( $ENV{"CLAM_EVENT"} ) {
+	$EVENT = $ENV{"CLAM_EVENT"};
+}
+if ( $ENV{"CLAM_ENGINE"} ) {
+	$ENGINE = $ENV{"CLAM_ENGINE"};
+	$ENGINE = "CLamAV " . $ENGINE;
+}else{
+	$ENGINE = "Engine $CLAM_ENGINE";
+}
+if ( $ENV{"CLAM_HOST"} ) {
+	$Host = $ENV{"CLAM_HOST"};
+}else{
+	use Sys::Hostname;
+	$Host = &hostname;
+}
+$Host = "Host " . $Host;
+#$DEBUG = 1;
+
+if ( $EVENT eq "VE" ) {
+	my @Virus;
+	# Test for Clamd Environment
+	if ( $ENV{"CLAM_VIRUSEVENT_VIRUSNAME"} ) {
+		$VR = $ENV{"CLAM_VIRUSEVENT_VIRUSNAME"};
+	}else{
+		$VR = "";
+	}
+	if ( $ENV{"CLAM_VIRUSEVENT_FILENAME"} ) {
+		$VF = $ENV{"CLAM_VIRUSEVENT_FILENAME"};
+	}else{
+		$VF = "";
+	}
+	if(@ARGV) {
+		# Viruses are handed to us on cmd line.
+		@Virus = @ARGV;
+		if (scalar ( @ARGV ) == 1 ) {
+			$tmp = $Virus[0];
+			&alert ($tmp);
+		}else{
+			foreach $tmp (@Virus) {
+				&alert ($tmp);
+			}
+		}
+	}else{
+		# Nothing handed to us.
+		if ( $VF && $VR ) {
+			# Get it from the clamd Environment
+			if ( $VF eq "stream" ) {
+				&alert ("$VR in $VF");
+			}else{
+				&alert ("$VR in file $VF");
+			}
+		}
+	}
+}elsif ( $EVENT eq "VA" ) {
+	if(@ARGV) {
+		$VF = "email";
+		$VR = $ARGV[0];
+		my $Qid = $ARGV[1];
+		my $Sender = $ARGV[2];
+		$RCPT = $ARGV[3];
+		$subject = $ARGV[4];
+		my $Mid = $ARGV[5];
+		my $MDate = $ARGV[6];
+		$VAmsg = "$msg $VR in $VF from $Sender to $RCPT\nOn $MDate with Subject $subject\nInternal Message Info.\nMessage ID: $Mid\n  Queue ID: $Qid\n\nIf you were expecting an email from this sender, you may wish to inform them of this virus.  If you were not expecting an email from this sender, then it is likely a forged message and not actually sent from the sender mentioned above.";
+		&alert ("$VR in $VF");
+		&mail ( "$VR in $VF", $VAmsg, $RCPT );
+	}else{
+		$subject = "Invalid Parameters";
+		$msg = $subject;
+		&mail ( $subject, $msg, $To );
+	}
+}elsif ( $EVENT eq "OE" || $EVENT eq "OO" ) {
+	# Get Official Engine & DB Info
+	use Net::DNS;
+	my $res = Net::DNS::Resolver->new();
+	my $query = $res->query("current.cvd.clamav.net", "TXT");
+	my ( $EV,$MV,$DV,$DNSAGE,$SBV,$BCV );
+	if ( $query ) {
+		foreach my $rr ($query->answer) {
+			next unless $rr->type eq "TXT";
+			$EV = $rr->rdatastr;
+			$EV =~s/\"//;
+			$EV =~s/\"//;
+			($EV,$MV,$DV,$DNSAGE,$SBV,$BCV) = ( split (/:/,$EV)) [0,1,2,3,6,7];
+			if ($DEBUG > 1 ) {
+				print "DNS Time Stamp " . localtime($DNSAGE) . "\n";
+				print "Official Engine Version $EV\n";
+				print "Official Main DB Version $MV\n";
+				print "Official Daily DB Version $DV\n";
+				print "Official ByteCode DB Version $BCV\n";
+				print "Official SafeBrowsing DB Version $SBV\n";
+			}
+		}
+	}
+	if ( $EVENT eq "OE" ) {
+		$subject = "Virus DB Update failed";
+		$msg = $subject;
+		if ( $query ) {
+			$msg = "$msg\nDNS Time Stamp " . localtime($DNSAGE) . "\n";
+			$msg = "$msg\nOfficial Main DB Version $MV\n";
+			$msg = "$msg\nOfficial Daily DB Version $DV\n";
+			$msg = "$msg\nOfficial ByteCode DB Version $BCV\n";
+			$msg = "$msg\nOfficial SafeBrowsing DB Version $SBV\n";
+		}
+	}elsif ( $EVENT eq "OO" ) {
+		if ( !$query && @ARGV ) {
+			$EV = $ARGV[0];
+		}
+		if ( $EV ) {
+			$subject = "Clamav $EV is now avialable";
+			$msg = $subject;
+			if ( $query  ) {
+				$msg = "$msg\nDNS Time Stamp " . localtime($DNSAGE) . "\n";
+			}
+			$msg = "$msg\nOfficial Engine Version Clamav $EV\n";
+			$msg = "$msg\n Current Engine Version $ENGINE\n";
+		}else{
+			$subject = "A new Clamav may be avialable";
+			$msg = $subject;
+		}
+	}else{
+		$subject = "Invalid Event";
+		$msg = $subject;
+	}
+	&mail ( $subject, $msg, $To );
+}elsif ( $EVENT eq "OU" ) {
+	$subject = "Virus DB Updated";
+	$msg = $subject;
+	&mail ( $subject, $msg, $To );
+}else{
+	$subject = "Invalid Event";
+	$msg = $subject;
+	&mail ( $subject, $msg, $To );
+}
+
+sub mail {
+	my ( $subject, $msg, $To ) = @_;
+	if ( $msg ne "" ) {
+		if ( $DEBUG ) {
+			$msg = "$Host Debuging message.\n$msg";
+		}
+		$msg = "$Host\n$ENGINE\n$msg";
+		system ( "echo \"$msg\"|$mail -s \"$subject\" $To" );
+	}else{
+		system ( "echo \"Invalid Message\"|$mail -s \"ERROR\" $To" );
+	}
+}
+
+sub alert {
+	my ( $tmp ) = @_;
+	my ( $subject, $lmsg );
+	if ( $DEBUG ) {
+		print "$EVENT $tmp\n";
+	}
+	if ( $tmp=~m/(ClamAV-Test-File)/ || $tmp=~m/(Eicar-Test-Signature)/ ) {
+		if ( $DEBUG ) {
+			$subject = "VIRUS TEST: $Host $tmp\n";
+		}
+	}
+	if ( !$subject ) {
+		$subject = "VIRUS ALERT: $Host $tmp\n";
+	}
+	if ( $EVENT eq "VE" ) {
+		if ( $tmp=~m/(ClamAV-Test-File)/ || $tmp=~m/(Eicar-Test-Signature)/ ) {
+			if ( $DEBUG ) {
+				$lmsg = "$msg $tmp";
+			}else{
+				$lmsg = "";
+			}
+		}else{
+			$lmsg = "$msg $tmp";
+		}
+	} elsif ( $EVENT eq "VA" ) {
+		$lmsg = "$VAmsg";
+	}
+	if ( $lmsg ne "") {
+		&mail ( $subject, $lmsg, $To );
+	}
+}

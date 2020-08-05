@@ -1,0 +1,2 @@
+#
+2 0,6,12,18 * * * root /sbin/shorewall show dynamic | grep reject | awk '{print $8}' | mail -s "Blocked IPs on $(hostname -f)" alerts > /dev/null 2>&1

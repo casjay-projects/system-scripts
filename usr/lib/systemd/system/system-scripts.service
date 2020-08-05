@@ -1,0 +1,19 @@
+#
+[Unit]
+Description=System Scripts
+After=network.target postfix.service 
+
+[Service]
+Type=simple
+Environment=TERM=linux
+Restart=always
+RestartSec=5
+ExecStartPre=/bin/sh -c "/etc/casjaysdev/system-scripts/systemd/uptime.sh"
+ExecStart=/bin/sh -c "/usr/share/system-scripts/hosts.sh >/dev/null &"
+ExecStop=/bin/sh -c "/usr/bin/kill $(cat /var/lib/system-scripts/run/hosts.pid) && /usr/bin/rm -f /var/lib/system-scripts/run/hosts.pid"
+ExecStopPost=/bin/sh -c "/etc/casjaysdev/system-scripts/systemd/downtime.sh"
+TimeoutSec=20
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
