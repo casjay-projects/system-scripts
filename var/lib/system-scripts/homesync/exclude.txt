@@ -2,4 +2,4 @@
 ./aquota.grp
 .spam*
 .usermin
-Maildir*
+Maildir/*

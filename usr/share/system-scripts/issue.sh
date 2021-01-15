@@ -36,7 +36,7 @@ fi
 
 if [ -f "$ISSUEMESS" ]; then
   echo "System Issues" >"$ISSUEFILE"
-  cat "$CONFDIR/messages/issue/"*.txt | grep -v '^$' | awk 'NF' >>"$ISSUEFILE"
+  cat "$CONFDIR/messages/issue"/*.txt | grep -v '^$' | awk 'NF' >>"$ISSUEFILE"
   echo "" >>$ISSUEMESS
 fi
 
