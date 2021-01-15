@@ -2,5 +2,5 @@
 PROG=net-uptime
 PROGPID=$(echo $$)
 SYSLOGDIR=/var/log
-UP=$(cat /var/lib/system-scripts/log/time.log |grep "%" | awk '{print $2}' | awk '{ SUM += $1} END { print SUM/1 }')
-echo $UP
+UP="$(cat /var/lib/system-scripts/log/time.log | grep "%" | awk '{print $2}' | awk '{ SUM += $1} END { print SUM/1 }')"
+echo "$UP"

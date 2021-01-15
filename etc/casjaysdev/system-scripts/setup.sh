@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 PROG=setup
 PROGPID=$(echo $$)
 
 if [ -f /etc/casjaysdev/system-scripts/.firstrun ]; then
-echo "This seems to have already been ran"
-echo "This should not be called directly"
-exit 0
+  echo "This seems to have already been ran"
+  echo "This should not be called directly"
+  exit 0
 fi
 
 mkdir -p /var/lib/system-scripts/checkip /etc/casjaysdev
@@ -25,18 +25,18 @@ fi
 
 ELARCH=$(uname -i)
 ELRELEASE=$(rpm -q --whatprovides redhat-release --queryformat "%{VERSION}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//')
-DIST=$(rpm -q --whatprovides redhat-release --queryformat "%{VENDOR}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//' | sed 's#Project##' | sed "s/ //g" )
+DIST=$(rpm -q --whatprovides redhat-release --queryformat "%{VENDOR}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//' | sed 's#Project##' | sed "s/ //g")
 if [ $DIST = "Scientific" ] || [ $DIST = "RedHat" ] || [ $DIST = "CentOS" ] || [ $DIST = "Casjay" ]; then
   DIST=RHEL
 fi
 
 echo "Distribution is $DIST"
 if [ $DIST = "RHEL" ]; then
-  yum install -y ftp://ftp.casjay.net/pub/Casjay/RHEL/$ELARCH/$ELRELEASE/rpms/casjay-release-1.0-1.casjay.el7.x86_64.rpm
+  yum install -y ftp://ftp.casjay.net/pub/Casjay/RHEL/$ELARCH/$ELRELEASE/rpms/casjay-release-1.0-1.casjay.el$ELRELEASE.x86_64.rpm
 fi
 
 if [ $DIST = "Fedora" ]; then
-  yum install -y ftp://ftp.casjay.net/pub/Casjay/Fedora/$ELARCH/$ELRELEASE/rpms/casjay-release-1-1.1.casjay.fc27.x86_64.rpm
+  yum install -y ftp://ftp.casjay.net/pub/Casjay/Fedora/$ELARCH/$ELRELEASE/rpms/casjay-release-1-1.1.casjay.fc$ELRELEASE.x86_64.rpm
 fi
 
 echo "Setting up and installing dependencies"
@@ -46,16 +46,16 @@ yum install -y proftpd createrepo cronie-noanacron munin-node bind vim bash-comp
 yum install -y rsync rsync-daemon uptimed downtimed awstats awffull webalizer cowsay fortune-mod ponysay --skip-broken
 yum install -y fail2ban shorewall shorewall6 bc netdata postfix proftpd httpd net-snmp php-fpm uptimed downtimed net-tools mailx --skip-broken
 
-/usr/bin/openssl genrsa -rand /proc/apm:/proc/cpuinfo:/proc/dma:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/pci:/proc/rtc:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key 2> /dev/null
+/usr/bin/openssl genrsa -rand /proc/apm:/proc/cpuinfo:/proc/dma:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/pci:/proc/rtc:/proc/uptime 2048 >/etc/pki/tls/private/localhost.key 2>/dev/null
 
-FQDN=`hostname`
+FQDN=$(hostname)
 if [ "x${FQDN}" = "x" ]; then
-   FQDN=localhost
+  FQDN=localhost
 fi
 
-cat << EOF | /usr/bin/openssl req -new -key /etc/pki/tls/private/localhost.key \
-         -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req \
-         -out /etc/pki/tls/certs/localhost.crt 2>/dev/null
+cat <<EOF | /usr/bin/openssl req -new -key /etc/pki/tls/private/localhost.key \
+  -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req \
+  -out /etc/pki/tls/certs/localhost.crt 2>/dev/null
 --
 SomeState
 SomeCity
@@ -65,13 +65,13 @@ ${FQDN}
 root@${FQDN}
 EOF
 
-MYIP4="$(/sbin/ifconfig | grep -E "venet|inet" | grep -v "127.0.0." | grep 'inet' | grep -v inet6 | awk '{print $2}' | sed s#addr:##g | head -n1)"
+MYIP4="$(/sbin/ifconfig | grep -E "venet|inet" | grep -v "127.0.0." | grep 'inet' | grep -v inet6 | awk '{print $2}' | sed 's#addr:##g' | head -n1)"
 MYIP6=$(/sbin/ifconfig | grep -E "venet|inet" | grep 'inet6' | grep -i global | awk '{print $2}' | head -n1)
-VHOSTS=$(ls /etc/httpd/conf/vhosts.d/*.conf 2> /dev/null | wc -l)
+VHOSTS=$(ls /etc/httpd/conf/vhosts.d/*.conf 2>/dev/null | wc -l)
 ELRELEASE=$(rpm -q --whatprovides redhat-release --queryformat "%{VERSION}\n" | sed 's/\/.*//' | sed 's/\..*//' | sed 's/Server*//')
 
-echo $MYIP4 > /var/lib/system-scripts/checkip/myip4.txt
-echo $MYIP6 > /var/lib/system-scripts/checkip/myip6.txt
+echo "$MYIP4" >/var/lib/system-scripts/checkip/myip4.txt
+echo "$MYIP6" >/var/lib/system-scripts/checkip/myip6.txt
 echo "My IPV4 address is $(cat /var/lib/system-scripts/checkip/myip4.txt)"
 echo "My IPV6 address is $(cat /var/lib/system-scripts/checkip/myip6.txt)"
 
@@ -80,7 +80,7 @@ touch /var/log/fail2ban.log
 
 systemctl enable system-scripts
 systemctl enable systemmail
-systemctl start system-scripts > /dev/null
+systemctl start system-scripts >/dev/null
 
 chmod -Rf 755 /etc/sysconfig/system-scripts.sh
 find /etc/casjaysdev/system-scripts -type f -exec chmod 0644 {} \;
@@ -101,10 +101,10 @@ HOME=/
 42 0 1 * * root run-parts /etc/cron.monthly
 EOF
 
-if [ ! -d /etc/rsync.d ]; then mkdir -p /etc/rsync.d ; fi
+if [ ! -d /etc/rsync.d ]; then mkdir -p /etc/rsync.d; fi
 if [ ! -f /etc/rsync.d/backup.conf ]; then
-RSYNCRANDOMNAME="backup-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1)"
-cat <<EOF >/etc/rsync.d/backup.conf
+  RSYNCRANDOMNAME="backup-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1)"
+  cat <<EOF >/etc/rsync.d/backup.conf
 [$RSYNCRANDOMNAME]
    path = /media/backups
    comment = backups
@@ -113,13 +113,13 @@ cat <<EOF >/etc/rsync.d/backup.conf
    read only = yes
    list = no
 EOF
-echo "
+  echo "
 The backup module name for $(hostname -f) is $RSYNCRANDOMNAME.
 You can backup using the command rsync -avhP rsync://$(hostname -f)/$RSYNCRANDOMNAME" | mail -s "rsync module name" root
 fi
 
 if [ ! -f /etc/rsync.d/ftp.conf ]; then
-cat <<EOF >/etc/rsync.d/ftp.conf
+  cat <<EOF >/etc/rsync.d/ftp.conf
 [ftp]
    path = /var/ftp/pub
    comment = FTP server
@@ -158,36 +158,36 @@ include /etc/logrotate.d
 EOF
 
 if [ -f /usr/bin/dircolors ]; then
-dircolors -p > /etc/DIR_COLORS
+  dircolors -p >/etc/DIR_COLORS
 fi
 
 if [ -f /usr/bin/nail ]; then
-rm -f /bin/mail
-ln -s /usr/bin/nail /bin/mail
+  rm -f /bin/mail
+  ln -s /usr/bin/nail /bin/mail
 fi
 
 if [ -f /usr/bin/vim ]; then
-rm -f /bin/vi
-ln -s /usr/bin/vim /bin/vi
+  rm -f /bin/vi
+  ln -s /usr/bin/vim /bin/vi
 fi
 
 rm -Rf /etc/cron.*/*anacron
 rm -Rf /etc/cron.*/0hourly
 
 if [ "$ELRELEASE" -lt "7" ]; then
-if ! grep -e "/usr/share/system-scripts/hosts.sh > /dev/null 2>&1 &" /etc/rc.d/rc.local > /dev/null;
-then echo "/usr/share/system-scripts/hosts.sh > /dev/null 2>&1 &" >> /etc/rc.d/rc.local
-fi
-if ! grep -e "/usr/share/system-scripts/cron.sh > /dev/null 2>&1 &" /etc/rc.d/rc.local > /dev/null;
-then echo "/usr/share/system-scripts/cron.sh > /dev/null 2>&1 &" >> /etc/rc.d/rc.local
-fi
-if ! grep -e "sleep 5" /etc/rc.d/rc.local > /dev/null;
-then echo "sleep 5" >> /etc/rc.d/rc.local
-fi
+  if ! grep -e "/usr/share/system-scripts/hosts.sh > /dev/null 2>&1 &" /etc/rc.d/rc.local >/dev/null; then
+    echo "/usr/share/system-scripts/hosts.sh > /dev/null 2>&1 &" >>/etc/rc.d/rc.local
+  fi
+  if ! grep -e "/usr/share/system-scripts/cron.sh > /dev/null 2>&1 &" /etc/rc.d/rc.local >/dev/null; then
+    echo "/usr/share/system-scripts/cron.sh > /dev/null 2>&1 &" >>/etc/rc.d/rc.local
+  fi
+  if ! grep -e "sleep 5" /etc/rc.d/rc.local >/dev/null; then
+    echo "sleep 5" >>/etc/rc.d/rc.local
+  fi
 fi
 
-if ! grep -e "system-scripts" /etc/aliases > /dev/null;
-then echo "system-scripts:       root" >> /etc/aliases
+if ! grep -e "system-scripts" /etc/aliases >/dev/null; then
+  echo "system-scripts:       root" >>/etc/aliases
 fi
 
 rm -Rf /etc/cron.*/*awstats*
@@ -196,19 +196,19 @@ rm -Rf /etc/cron.*/*webalizer*
 rm -Rf /etc/cron.*/*awffull*
 
 if [ -f /etc/casjaysdev/system-scripts/messages/000.legal.txt ]; then
-sed -i "s|myserverdomainname|$(hostname -f)|g" /etc/casjaysdev/system-scripts/messages/000.legal.txt
+  sed -i "s|myserverdomainname|$(hostname -f)|g" /etc/casjaysdev/system-scripts/messages/000.legal.txt
 fi
 
 if [ -f /usr/bin/newaliases ]; then
-/usr/bin/newaliases > /dev/null
+  /usr/bin/newaliases >/dev/null
 fi
 
 if [ ! -d /var/log/system-scripts ]; then
-ln -s /var/lib/system-scripts/log /var/log/system-scripts
+  ln -s /var/lib/system-scripts/log /var/log/system-scripts
 fi
 
 if [ ! -d /var/run/system-scripts ]; then
-ln -s /var/lib/system-scripts/run /var/run/system-scripts
+  ln -s /var/lib/system-scripts/run /var/run/system-scripts
 fi
 
 mkdir -p /var/spool/uptimed
@@ -220,37 +220,37 @@ touch /var/lib/system-scripts/downtime/date.down
 touch /var/lib/system-scripts/downtime/time.down
 touch /var/lib/downtimed/downtimedb
 
-if [ ! -d /etc/httpd/conf/vhosts.d ];then
-mkdir -p /etc/httpd/conf/vhosts.d
+if [ ! -d /etc/httpd/conf/vhosts.d ]; then
+  mkdir -p /etc/httpd/conf/vhosts.d
 fi
 
 if [ ! -f /etc/httpd/conf/vhosts.d/0000-default.conf ]; then
-echo -e "<VirtualHost _default_:80>
+  echo -e "<VirtualHost _default_:80>
 ServerAdmin admin@$(hostname -f)
 ServerName $(hostname -f)
 DocumentRoot /var/www/html
-</VirtualHost>" > /etc/httpd/conf/vhosts.d/0000-default.conf
+</VirtualHost>" >/etc/httpd/conf/vhosts.d/0000-default.conf
 fi
 
 if [ ! -d /usr/share/httpd ]; then
-mkdir -p /usr/share/httpd
+  mkdir -p /usr/share/httpd
 fi
 
 if [ -d /var/www/awstats ]; then
-mv -f /var/www/awstats /usr/share/awstats
-mkdir -p /usr/share/awstats/cgi-bin
+  mv -f /var/www/awstats /usr/share/awstats
+  mkdir -p /usr/share/awstats/cgi-bin
 fi
 
 if [ -d /var/www/icons ]; then
-mv -f /var/www/icons /usr/share/httpd/
+  mv -f /var/www/icons /usr/share/httpd/
 fi
 
 if [ -d /var/www/error ]; then
-mv -f /var/www/error /usr/share/httpd/
+  mv -f /var/www/error /usr/share/httpd/
 fi
 
 if [ -d /var/www/manual ]; then
-mv -f /var/www/manual /usr/share/httpd/
+  mv -f /var/www/manual /usr/share/httpd/
 fi
 
 sed -i 's|/var/www/awstats|/usr/share/awstats|g' /etc/httpd/conf.d/awstats.conf
@@ -260,12 +260,12 @@ sed -i 's|/var/www/manual|/usr/share/httpd/manual|g' /etc/httpd/conf/httpd.conf
 
 ISIP6="$(/sbin/ifconfig | grep -E "venet|inet" | grep 'inet6' | grep -i global | awk '{print $2}' | head -n1)"
 if [ ! -z "$ISIP6" ]; then
-echo "IPV6 enabled so configuring for that"
-yum install -y shorewall6
-systemctl enable shorewall6
+  echo "IPV6 enabled so configuring for that"
+  yum install -y shorewall6
+  systemctl enable shorewall6
 fi
 
-echo "Installed on $(date)" > /etc/casjaysdev/system-scripts/.firstrun
+echo "Installed on $(date)" >/etc/casjaysdev/system-scripts/.firstrun
 
 source /root/bin/changeip.sh
 source /etc/casjaysdev/system-scripts/systemd/uptime.sh

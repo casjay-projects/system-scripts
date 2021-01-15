@@ -40,18 +40,18 @@ MIRRORFUSIONNONFREESRPMS="rsync://mirror.us.leaseweb.net/rpmfusion/nonfree/el/up
 MIRRORCPAN="rsync://mirrors.rit.edu/cpan"
 
 #FEDORA RSYNC Options
-FEDORAVER="28"
+FEDORAVER="32"
 MIRRORFEDORA="rsync://mirrors.liquidweb.com/fedora/releases/$FEDORAVER/Everything/$ELARCH/os"
 MIRRORFEDORAUPDATE="rsync://mirrors.liquidweb.com/fedora/updates/$FEDORAVER/$ELARCH"
 MIRRORFEDORADLSRPMS="rsync://mirrors.liquidweb.com/fedora/updates/$FEDORAVER/SRPMS"
 MIRRORFEDORADLSRPMSUPDATES="http://mirrors.liquidweb.com/fedora/releases/$FEDORAVER/Everything/source"
 
 #DEBIAN RSYNC Options
-DEBIANVER="9.5"
+DEBIANVER="10"
 MIRRORDEBIAN="rsync://mirrors.liquidweb.com/debian"
 
 #UBUNTU RSYNC Options
-UNUNTUVER=18.04
+UNUNTUVER=20.04
 MIRRORUBUNTU="rsync://mirrors.liquidweb.com/ubuntu"
 
 #PHP RSYNC Options

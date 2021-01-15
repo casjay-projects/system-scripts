@@ -14,7 +14,7 @@ The packages on debian put exectuables in different locations.
   
 To install
   
-```
+```shell
 git clone https://github.com/CasjaysDev/system-scripts.git /tmp/system-scripts
 find /tmp/system-scripts/ -type f -iname ".sh" -exec chmod 755 {} \;  
 find /tmp/system-scripts/ -type f -iname ".pl" -exec chmod 755 {} \;  
