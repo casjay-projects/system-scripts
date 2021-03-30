@@ -90,3 +90,4 @@ rm -f "$ERRORLOG"
 rm -f "$INSTALLEDRPMSLOCK"
 echo "exit = $?" >>"$LOGFILE"
 exit $?
+

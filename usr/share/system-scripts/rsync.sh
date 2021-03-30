@@ -106,3 +106,4 @@ rm -f "$ERRORLOG"
 rm -f "$RSYNCLOCK"
 echo "exit = $?" >>"$LOGFILE"
 exit $?
+

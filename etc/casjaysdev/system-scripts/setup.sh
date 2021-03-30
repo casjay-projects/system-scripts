@@ -1,7 +1,60 @@
 #!/usr/bin/env bash
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+APPNAME="$(basename "$0")"
+VERSION="202103292355-git"
+USER="${SUDO_USER:-${USER}}"
+HOME="${USER_HOME:-${HOME}}"
+SRC_DIR="${BASH_SOURCE%/*}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#set opts
 PROG=setup
 PROGPID=$(echo $$)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version       : 202103292355-git
+# @Author        : Jason Hempstead
+# @Contact       : jason@casjaysdev.com
+# @License       : WTFPL
+# @ReadME        : setup.sh --help
+# @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
+# @Created       : Monday, Mar 29, 2021 23:55 EDT
+# @File          : setup.sh
+# @Description   : Primary install script
+# @TODO          :
+# @Other         :
+# @Resource      :
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ $# -gt 0 ]; then
+  cat <<EOF
+Supports the following variables
+MY_STATE
+MY_CITY
+MY_COMPANY
+MY_UNIT
+MY_DOMAIN
+MY_ADMIN_EMAIL
+
+EOF
+
+if [ $UID != 0 ] || [ "$USER" != "root" ]; then
+  echo "this script requires root/sudo"
+  echo "Rerun with sudo or su -c "
+fi
+
+FQDN="${MY_DOMAIN:-$(hostname -f)}"
+if [ "${FQDN}" = "" ]; then
+  echo "This need a full hostname"
+  exit 1
+fi
+
+${MY_STATE:-MyState}
+${MY_CITY:-MyCity}
+${MY_COMPANY:-SomeCompany}
+${MY_UNIT:-SomeUnit}
+${MY_DOMAIN:-$FQDN}
+${MY_ADMIN_EMAIL:-root@FQDN}
+
+fi
 if [ -f /etc/casjaysdev/system-scripts/.firstrun ]; then
   echo "This seems to have already been ran"
   echo "This should not be called directly"
@@ -48,21 +101,16 @@ yum install -y fail2ban shorewall shorewall6 bc netdata postfix proftpd httpd ne
 
 /usr/bin/openssl genrsa -rand /proc/apm:/proc/cpuinfo:/proc/dma:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/pci:/proc/rtc:/proc/uptime 2048 >/etc/pki/tls/private/localhost.key 2>/dev/null
 
-FQDN=$(hostname)
-if [ "x${FQDN}" = "x" ]; then
-  FQDN=localhost
-fi
-
 cat <<EOF | /usr/bin/openssl req -new -key /etc/pki/tls/private/localhost.key \
   -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req \
   -out /etc/pki/tls/certs/localhost.crt 2>/dev/null
 --
-SomeState
-SomeCity
-SomeOrganization
-SomeOrganizationalUnit
-${FQDN}
-root@${FQDN}
+${MY_STATE:-SomeState}
+${MY_CITY:-SomeCity}
+${MY_COMPANY:-SomeOrganization}
+${MY_UNIT:-SomeOrganizationalUnit}
+${MY_DOMAIN:-$FQDN}
+${MY_ADMIN_EMAIL:-root@$FQDN}
 EOF
 
 MYIP4="$(/sbin/ifconfig | grep -E "venet|inet" | grep -v "127.0.0." | grep 'inet' | grep -v inet6 | awk '{print $2}' | sed 's#addr:##g' | head -n1)"
@@ -91,7 +139,7 @@ find /var/lib/system-scripts -type f -exec chmod 0644 {} \;
 cat <<EOF >/etc/crontab
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=cron@$(hostname -f)
+MAILTO=cron@$FQDN
 HOME=/
 
 # run-parts
@@ -114,8 +162,8 @@ if [ ! -f /etc/rsync.d/backup.conf ]; then
    list = no
 EOF
   echo "
-The backup module name for $(hostname -f) is $RSYNCRANDOMNAME.
-You can backup using the command rsync -avhP rsync://$(hostname -f)/$RSYNCRANDOMNAME" | mail -s "rsync module name" root
+The backup module name for $FQDN is $RSYNCRANDOMNAME.
+You can backup using the command rsync -avhP rsync://$FQDN/$RSYNCRANDOMNAME" | mail -s "rsync module name" $MY_ADMIN_EMAIL
 fi
 
 if [ ! -f /etc/rsync.d/ftp.conf ]; then
@@ -196,7 +244,7 @@ rm -Rf /etc/cron.*/*webalizer*
 rm -Rf /etc/cron.*/*awffull*
 
 if [ -f /etc/casjaysdev/system-scripts/messages/000.legal.txt ]; then
-  sed -i "s|myserverdomainname|$(hostname -f)|g" /etc/casjaysdev/system-scripts/messages/000.legal.txt
+  sed -i "s|myserverdomainname|$FQDN|g" /etc/casjaysdev/system-scripts/messages/000.legal.txt
 fi
 
 if [ -f /usr/bin/newaliases ]; then
@@ -226,8 +274,8 @@ fi
 
 if [ ! -f /etc/httpd/conf/vhosts.d/0000-default.conf ]; then
   echo -e "<VirtualHost _default_:80>
-ServerAdmin admin@$(hostname -f)
-ServerName $(hostname -f)
+ServerAdmin ${MY_ADMIN_EMAIL:-admin@$FQDN}
+ServerName $FQDN
 DocumentRoot /var/www/html
 </VirtualHost>" >/etc/httpd/conf/vhosts.d/0000-default.conf
 fi
@@ -275,3 +323,4 @@ systemctl enable munin-node shorewall named httpd php-fpm fail2ban snmpd proftpd
 systemctl disable firewalld
 
 echo "It is advisable that you reboot your server"
+

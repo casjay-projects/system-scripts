@@ -23,7 +23,7 @@ echo -e "$PROG started on $STARTDATE at $STARTTIME" >"$LOGFILE"
 #
 CMDS=(ping bc mv sleep)
 for CMD in "${CMDS[@]:0}"; do
-  if [[ "$(which $CMD 2>/dev/null)" = "" ]]; then
+  if [[ "$(type -P $CMD 2>/dev/null)" = "" ]]; then
     echo "$CMD not found. Exiting."
     exit
   fi
@@ -182,3 +182,4 @@ rm -f "$ERRORLOG"
 rm -f "$PIDFILE"
 echo "exit = $?" >>"$LOGFILE"
 exit $?
+

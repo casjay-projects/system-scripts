@@ -122,3 +122,4 @@ rm -f "$ERRORLOG"
 rm -f $CREATEREPOLOCK
 echo "exit = $?" >>"$LOGFILE"
 exit $?
+

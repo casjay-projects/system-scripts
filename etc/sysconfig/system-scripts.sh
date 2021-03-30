@@ -1,9 +1,38 @@
 #!/usr/bin/env bash
-#This file will be over written on update!
-#You may override any configuration in this file
-#by creating /usr/share/system-scripts/include/*.sh
-#and modifying that file or copy this file to
-#/etc/casjaysdev/system-scripts/include/custom/customname.sh.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+APPNAME="$(basename "$0")"
+VERSION="202103292334-git"
+USER="${SUDO_USER:-${USER}}"
+HOME="${USER_HOME:-${HOME}}"
+SRC_DIR="${BASH_SOURCE%/*}"
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#set opts
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+##@Version       : 202103292334-git
+# @Author        : Jason Hempstead
+# @Contact       : jason@casjaysdev.com
+# @License       : WTFPL
+# @ReadME        : system-scripts.sh --help
+# @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
+# @Created       : Monday, Mar 29, 2021 23:34 EDT
+# @File          : system-scripts.sh
+# @Description   : Main source file for my server script
+# @TODO          : Update code using template
+# @Other         : This file will be over written on update!
+# @Resource      : http://github.com/systemmgr/server
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ $# -ne 0 ]; then
+  cat <<OEF
+# Main source file for my servers
+# This file will be over written on update!
+# You may override any configuration in this file
+# by creating /usr/share/system-scripts/include/*.sh
+# and modifying that file or copy this file to
+# /etc/casjaysdev/system-scripts/include/custom/customname.sh.
+exit 1
+OEF
+fi
 
 if [ ! -d /var/lib/system-scripts/log ]; then mkdir -p /var/lib/system-scripts/log; fi
 if [ ! -d /var/lib/system-scripts/run ]; then mkdir -p /var/lib/system-scripts/run; fi
@@ -305,3 +334,4 @@ if [ "$INCLUDESCRIPTSCUSTOM" != "0" ]; then
     source "$file"
   done
 fi
+

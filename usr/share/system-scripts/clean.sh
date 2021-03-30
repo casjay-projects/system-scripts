@@ -74,3 +74,4 @@ rm -f "$ERRORLOG"
 rm -f "$PIDFILE"
 echo "exit = $?" >>"$LOGFILE"
 exit $?
+
