@@ -11,7 +11,7 @@ SRC_DIR="${BASH_SOURCE%/*}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ##@Version       : 202103292345-git
 # @Author        : Jason Hempstead
-# @Contact       : jason@casjaysdev.com
+# @Contact       : jason@casjaysdev.pro
 # @License       : WTFPL
 # @ReadME        : downtime.sh --help
 # @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev

@@ -13,7 +13,7 @@ PROGPID=$(echo $$)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ##@Version       : 202103292355-git
 # @Author        : Jason Hempstead
-# @Contact       : jason@casjaysdev.com
+# @Contact       : jason@casjaysdev.pro
 # @License       : WTFPL
 # @ReadME        : setup.sh --help
 # @Copyright     : Copyright: (c) 2021 Jason Hempstead, CasjaysDev
@@ -85,11 +85,11 @@ fi
 
 echo "Distribution is $DIST"
 if [ $DIST = "RHEL" ]; then
-  yum install -y ftp://ftp.casjay.net/pub/Casjay/RHEL/$ELARCH/$ELRELEASE/rpms/casjay-release-1.0-1.casjay.el$ELRELEASE.x86_64.rpm
+  yum install -y ftp://ftp.casjay.pro/pub/Casjay/RHEL/$ELARCH/$ELRELEASE/rpms/casjay-release-1.0-1.casjay.el$ELRELEASE.x86_64.rpm
 fi
 
 if [ $DIST = "Fedora" ]; then
-  yum install -y ftp://ftp.casjay.net/pub/Casjay/Fedora/$ELARCH/$ELRELEASE/rpms/casjay-release-1-1.1.casjay.fc$ELRELEASE.x86_64.rpm
+  yum install -y ftp://ftp.casjay.pro/pub/Casjay/Fedora/$ELARCH/$ELRELEASE/rpms/casjay-release-1-1.1.casjay.fc$ELRELEASE.x86_64.rpm
 fi
 
 echo "Setting up and installing dependencies"
