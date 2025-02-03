@@ -16,17 +16,17 @@ echo "$PROGPID" >"$PIDFILE"
 
 echo -e "$PROG started on $STARTDATE at $STARTTIME" >>"$LOGFILE" 2>>"$ERRORLOG"
 
-[ -d /usr/share/httpd ] || mkdir -p /usr/share/httpd
+[ -d /usr/local/share/httpd ] || mkdir -p /usr/local/share/httpd
 [ -d /var/www/awstats ] && mv -f /var/www/awstats /usr/share/awstats && mkdir -p /usr/share/awstats/cgi-bin
-[ -d /var/www/icons ] && mv -f /var/www/icons /usr/share/httpd/
-[ -d /var/www/error ] && mv -f /var/www/error /usr/share/httpd/
-[ -d /var/www/manual ] && mv -f /var/www/manual /usr/share/httpd/
+[ -d /var/www/icons ] && mv -f /var/www/icons /usr/local/share/httpd/
+[ -d /var/www/error ] && mv -f /var/www/error /usr/local/share/httpd/
+[ -d /var/www/manual ] && mv -f /var/www/manual /usr/local/share/httpd/
 [ -f /etc/httpd/conf.d/awstats.conf ] && sed -i 's|/var/www/awstats|/usr/share/awstats|g' /etc/httpd/conf.d/awstats.conf
 
 if [ -f /etc/httpd/conf/httpd.conf ]; then
-  sed -i 's|/var/www/icons|/usr/share/httpd/icons|g' /etc/httpd/conf/httpd.conf
-  sed -i 's|/var/www/error|/usr/share/httpd/error|g' /etc/httpd/conf/httpd.conf
-  sed -i 's|/var/www/manual|/usr/share/httpd/manual|g' /etc/httpd/conf/httpd.conf
+  sed -i 's|/var/www/icons|/usr/local/share/httpd/icons|g' /etc/httpd/conf/httpd.conf
+  sed -i 's|/var/www/error|/usr/local/share/httpd/error|g' /etc/httpd/conf/httpd.conf
+  sed -i 's|/var/www/manual|/usr/local/share/httpd/manual|g' /etc/httpd/conf/httpd.conf
 fi
 if [ -f "$(command -v cpan 2>/dev/null)" ]; then
   cpan Bit::Vector Carp::Clan Date::Calc Digest::SHA1 Compress::Zlib Net::DNS Archive::Tar Archive::Zip Archive::Rar
@@ -141,4 +141,3 @@ rm -f "$ERRORLOG"
 rm -f "$PIDFILE"
 echo "exit = $?" >>"$LOGFILE"
 exit $?
-

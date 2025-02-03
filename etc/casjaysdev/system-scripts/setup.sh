@@ -36,23 +36,23 @@ MY_ADMIN_EMAIL
 
 EOF
 
-if [ $UID != 0 ] || [ "$USER" != "root" ]; then
-  echo "this script requires root/sudo"
-  echo "Rerun with sudo or su -c "
-fi
+  if [ $UID != 0 ] || [ "$USER" != "root" ]; then
+    echo "this script requires root/sudo"
+    echo "Rerun with sudo or su -c "
+  fi
 
-FQDN="${MY_DOMAIN:-$(hostname -f)}"
-if [ "${FQDN}" = "" ]; then
-  echo "This need a full hostname"
-  exit 1
-fi
+  FQDN="${MY_DOMAIN:-$(hostname -f)}"
+  if [ "${FQDN}" = "" ]; then
+    echo "This need a full hostname"
+    exit 1
+  fi
 
-${MY_STATE:-MyState}
-${MY_CITY:-MyCity}
-${MY_COMPANY:-SomeCompany}
-${MY_UNIT:-SomeUnit}
-${MY_DOMAIN:-$FQDN}
-${MY_ADMIN_EMAIL:-root@FQDN}
+  ${MY_STATE:-MyState}
+  ${MY_CITY:-MyCity}
+  ${MY_COMPANY:-SomeCompany}
+  ${MY_UNIT:-SomeUnit}
+  ${MY_DOMAIN:-$FQDN}
+  ${MY_ADMIN_EMAIL:-root@FQDN}
 
 fi
 if [ -f /etc/casjaysdev/system-scripts/.firstrun ]; then
@@ -280,8 +280,8 @@ DocumentRoot /var/www/html
 </VirtualHost>" >/etc/httpd/conf/vhosts.d/0000-default.conf
 fi
 
-if [ ! -d /usr/share/httpd ]; then
-  mkdir -p /usr/share/httpd
+if [ ! -d /usr/local/share/httpd ]; then
+  mkdir -p /usr/local/share/httpd
 fi
 
 if [ -d /var/www/awstats ]; then
@@ -290,21 +290,21 @@ if [ -d /var/www/awstats ]; then
 fi
 
 if [ -d /var/www/icons ]; then
-  mv -f /var/www/icons /usr/share/httpd/
+  mv -f /var/www/icons /usr/local/share/httpd/
 fi
 
 if [ -d /var/www/error ]; then
-  mv -f /var/www/error /usr/share/httpd/
+  mv -f /var/www/error /usr/local/share/httpd/
 fi
 
 if [ -d /var/www/manual ]; then
-  mv -f /var/www/manual /usr/share/httpd/
+  mv -f /var/www/manual /usr/local/share/httpd/
 fi
 
 sed -i 's|/var/www/awstats|/usr/share/awstats|g' /etc/httpd/conf.d/awstats.conf
-sed -i 's|/var/www/icons|/usr/share/httpd/icons|g' /etc/httpd/conf/httpd.conf
-sed -i 's|/var/www/error|/usr/share/httpd/error|g' /etc/httpd/conf/httpd.conf
-sed -i 's|/var/www/manual|/usr/share/httpd/manual|g' /etc/httpd/conf/httpd.conf
+sed -i 's|/var/www/icons|/usr/local/share/httpd/icons|g' /etc/httpd/conf/httpd.conf
+sed -i 's|/var/www/error|/usr/local/share/httpd/error|g' /etc/httpd/conf/httpd.conf
+sed -i 's|/var/www/manual|/usr/local/share/httpd/manual|g' /etc/httpd/conf/httpd.conf
 
 ISIP6="$(/sbin/ifconfig | grep -E "venet|inet" | grep 'inet6' | grep -i global | awk '{print $2}' | head -n1)"
 if [ ! -z "$ISIP6" ]; then
@@ -323,4 +323,3 @@ systemctl enable munin-node shorewall named httpd php-fpm fail2ban snmpd proftpd
 systemctl disable firewalld
 
 echo "It is advisable that you reboot your server"
-
